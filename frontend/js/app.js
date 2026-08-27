@@ -377,33 +377,74 @@ if (document.getElementById('searchInput')) {
 }
 
 // ---------------- Authentication & RBAC ----------------
-function doLogin() {
-  const name = document.getElementById('loginName').value.trim() || 'User';
+let isLoginMode = true;
+
+function toggleAuthMode() {
+  isLoginMode = !isLoginMode;
+  document.getElementById('authTitle').textContent = isLoginMode ? 'Sign In' : 'Create Account';
+  document.getElementById('authDesc').textContent = isLoginMode ? 'Authenticate to access the monitoring dashboard.' : 'Register a new account to access the dashboard.';
+  document.getElementById('authBtn').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
+  document.getElementById('authToggle').textContent = isLoginMode ? "Don't have an account? Sign up" : 'Already have an account? Sign in';
+  document.getElementById('loginRole').style.display = isLoginMode ? 'none' : 'block';
+}
+
+async function doAuth() {
+  const username = document.getElementById('loginName').value.trim();
+  const password = document.getElementById('loginPassword').value;
   const role = document.getElementById('loginRole').value;
-  currentUser = { name, role };
   
-  document.getElementById('loginOverlay').style.display = 'none';
+  if(!username || !password) return showToast('Please enter username and password');
   
-  // Update UI with user info
-  const nameEls = document.querySelectorAll('.profile-name, .topbar-user .name');
-  const roleEls = document.querySelectorAll('.profile-role, .topbar-user .role');
-  const avEls = document.querySelectorAll('.avatar');
+  const endpoint = isLoginMode ? '/api/login' : '/api/signup';
+  const payload = { username, password };
+  if(!isLoginMode) payload.role = role;
   
-  nameEls.forEach(el => el.textContent = name);
-  roleEls.forEach(el => el.textContent = role);
-  avEls.forEach(el => el.textContent = name.substring(0,2).toUpperCase());
-  
-  // Enforce RBAC on auth-required buttons
-  const authBtns = document.querySelectorAll('.auth-required');
-  if(role === 'Viewer') {
-    authBtns.forEach(btn => {
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = 'Permission denied (Viewer)';
-      btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showToast('Permission denied.'); };
+  try {
+    const res = await fetch(backendUrl + endpoint, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
+    
+    const data = await res.json();
+    if(!res.ok) {
+      return showToast(data.detail || 'Authentication failed');
+    }
+    
+    currentUser = { name: data.username, role: data.role };
+    document.getElementById('loginOverlay').style.display = 'none';
+    
+    // Update UI with user info
+    const nameEls = document.querySelectorAll('.profile-name, .topbar-user .name');
+    const roleEls = document.querySelectorAll('.profile-role, .topbar-user .role');
+    const avEls = document.querySelectorAll('.avatar');
+    
+    nameEls.forEach(el => el.textContent = currentUser.name);
+    roleEls.forEach(el => el.textContent = currentUser.role);
+    avEls.forEach(el => el.textContent = currentUser.name.substring(0,2).toUpperCase());
+    
+    // Enforce RBAC on auth-required buttons
+    const authBtns = document.querySelectorAll('.auth-required');
+    if(currentUser.role === 'Viewer') {
+      authBtns.forEach(btn => {
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Permission denied (Viewer)';
+        btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showToast('Permission denied.'); };
+      });
+    } else {
+      authBtns.forEach(btn => {
+        btn.style.opacity = '1';
+        btn.style.cursor = '';
+        btn.title = '';
+        // restore onclicks for specific buttons? They are inline, so we just let them be, but we need to remove the block
+        btn.onclick = null; // Wait, we can't restore the original onclick if we overwrite it.
+        // Actually, triggerResponse and others already check currentUser.role internally!
+      });
+    }
+    showToast(`Logged in as ${currentUser.name} (${currentUser.role})`);
+  } catch(e) {
+    showToast('Network error connecting to backend');
   }
-  showToast(`Logged in as ${name} (${role})`);
 }
 
 // ---------------- Chart & Metrics ----------------
