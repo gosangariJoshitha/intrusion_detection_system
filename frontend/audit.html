@@ -22,9 +22,9 @@
   </div>
 
     <nav>
-    <a href="index.html" class="nav-item active">
+    <a href="index.html" class="nav-item ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Dashboard <span class="nav-dot" style="display:block"></span>
+      Dashboard <span class="nav-dot" style="display:none"></span>
     </a>
     <a href="incidents.html" class="nav-item ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
@@ -34,9 +34,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2 8 4-16 2 8h6"/></svg>
       Historical Events <span class="nav-dot" style="display:none"></span>
     </a>
-    <a href="audit.html" class="nav-item ">
+    <a href="audit.html" class="nav-item active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Audit & Actions <span class="nav-dot" style="display:none"></span>
+      Audit & Actions <span class="nav-dot" style="display:block"></span>
     </a>
   </nav>
 
@@ -81,102 +81,27 @@
     <div id="connStatus" class="conn-status">Auto-connecting to localhost:8000 — change the URL above for a LAN IP or deployed backend.</div>
   </div>
 
-  <!-- VIEW: LIVE -->
-  <section id="sec-live" class="view-section">
-    <div class="status-line"><span class="pulse"></span> Operational status: <span id="opStatus">connecting</span></div>
-    <h1 class="hero display">System overview</h1>
-    <p class="hero-desc">Real-time adaptive intrusion detection and network analysis, scored live by a trained model. <b id="nodeCount">Waiting for backend…</b></p>
-
-    <div class="stat-grid">
-      <div class="stat-card c-global">
-        <div class="stat-top">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg></div>
-          <span class="stat-tag">GLOBAL</span>
-        </div>
-        <div class="stat-label">Events processed</div>
-        <div class="stat-value display"><span id="attackAvg">0</span></div>
-        <div class="stat-foot foot-neutral" id="attackAvgFoot">Waiting for feed</div>
-      </div>
-      <div class="stat-card c-neural">
-        <div class="stat-top">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg></div>
-          <span class="stat-tag">NEURAL</span>
-        </div>
-        <div class="stat-label">Avg model confidence</div>
-        <div class="stat-value display"><span id="detAcc">—</span><span>%</span></div>
-        <div class="stat-foot foot-neutral" id="detAccFoot">Waiting for feed</div>
-      </div>
-      <div class="stat-card c-critical">
-        <div class="stat-top">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l10 18H2L12 2z"/><path d="M12 9v5M12 17h.01"/></svg></div>
-          <span class="stat-tag">CRITICAL</span>
-        </div>
-        <div class="stat-label">Intrusions detected</div>
-        <div class="stat-value display" id="activeThreats">0</div>
-        <div class="stat-foot foot-neutral" id="activeThreatsFoot">Total this session</div>
-      </div>
-      <div class="stat-card c-health">
-        <div class="stat-top">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2 8 4-16 2 8h6"/></svg></div>
-          <span class="stat-tag">HEALTH</span>
-        </div>
-        <div class="stat-label">Backend uptime</div>
-        <div class="stat-value display"><span id="uptime">—</span></div>
-        <div class="stat-foot foot-neutral" id="uptimeFoot">Not connected</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2 8 4-16 2 8h6"/></svg>Network traffic analysis</div>
-          <div class="legend">
-            <span><span class="dot" style="background:var(--green)"></span>Requests</span>
-            <span><span class="dot" style="background:var(--red)"></span>Threats</span>
-          </div>
-        </div>
-        <div id="chartWrap">
-          <svg id="chartSvg" viewBox="0 0 760 210" preserveAspectRatio="none" style="width:100%; height:100%; overflow:visible;"></svg>
-          <div id="tooltip"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title" style="margin-bottom:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>Model performance</div>
-        <div class="posture-row">
-          <div class="posture-top"><span>Binary accuracy</span><b id="metricBinAcc">—</b></div>
-          <div class="posture-track"><div class="posture-fill" id="metricBinFill" style="width:0%; background:var(--green);"></div></div>
-        </div>
-        <div class="posture-row">
-          <div class="posture-top"><span>Multiclass accuracy</span><b id="metricMultiAcc">—</b></div>
-          <div class="posture-track"><div class="posture-fill" id="metricMultiFill" style="width:0%; background:var(--cyan);"></div></div>
-        </div>
-        <div class="posture-row">
-          <div class="posture-top"><span>Session intrusion rate</span><b id="metricIntrusionRate">—</b></div>
-          <div class="posture-track"><div class="posture-fill" id="metricIntrusionFill" style="width:0%; background:var(--amber);"></div></div>
-        </div>
-      </div>
-    </div>
-
+  <!-- VIEW: AUDIT -->
+  <section id="sec-audit" class="view-section" >
+    <h1 class="hero display">Audit Trail & Responses</h1>
+    <p class="hero-desc">Immutable log of system actions, defensive firewall responses, and ML operations.</p>
     <div class="table-panel">
       <div class="table-top">
-        <div class="table-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2 8 4-16 2 8h6"/></svg>Live network events</div>
-        <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-          <input id="searchInput" placeholder="Search events...">
+        <div class="table-title">System Audit Log</div>
+        <div style="display:flex; gap:10px;">
+          <button class="conn-btn" onclick="fetchAudit()">Refresh Logs</button>
+          <button class="conn-btn" onclick="exportTableToCSV('auditBody', 'audit_log.csv')" style="background:var(--surface); border:1px solid var(--border); color:var(--text);">Export CSV</button>
         </div>
       </div>
-      <div style="max-height:420px; overflow-y:auto;">
+      <div style="max-height:600px; overflow-y:auto;">
         <table>
           <thead>
             <tr>
-              <th>Timestamp</th><th>Source IP</th><th>Target IP / Domain</th><th>Protocol</th>
-              <th>Type</th><th>Attack type</th><th>Severity</th><th>Confidence</th><th>Action</th>
+              <th>Timestamp</th><th>Actor</th><th>Action</th><th>Target</th><th>Reason</th><th>Status</th>
             </tr>
           </thead>
-          <tbody id="eventsBody"></tbody>
+          <tbody id="auditBody"></tbody>
         </table>
-        <div id="emptyState" class="table-empty" >No events match your filters.</div>
       </div>
     </div>
   </section>
