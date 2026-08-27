@@ -110,7 +110,6 @@ async function fetchHistory() {
         <td class="attack-type">${e.attack_type || '—'}</td>
         <td>${sevBadge(e.severity)}</td>
       </tr>
-      </tr>
     `).join('');
   } catch(e) {}
 }
