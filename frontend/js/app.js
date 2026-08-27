@@ -1,5 +1,4 @@
-const LS_KEY = 'aids_backend_url';
-let backendUrl = localStorage.getItem(LS_KEY) || 'http://localhost:8000';
+let backendUrl = 'http://localhost:8000';
 let ws = null;
 let currentMode = 'simulated';
 let events = [];
@@ -8,8 +7,6 @@ let chartBuckets = [];
 const BUCKET_SECONDS = 10, MAX_BUCKETS = 30;
 let protoCounts = { 'TCP': 0, 'UDP': 0, 'ICMP': 0, 'DNS': 0, 'Other': 0 };
 let totalProtos = 0;
-
-document.getElementById('backendUrl').value = backendUrl;
 
 
 
@@ -188,9 +185,7 @@ function blockModalIp() { triggerResponse('BLOCK_IP', activeIp); closeIpModal();
 function toWsUrl(httpUrl){ return httpUrl.trim().replace(/\/+$/,'').replace(/^http/,'ws') + '/ws'; }
 
 function connect(){
-  backendUrl = document.getElementById('backendUrl').value.trim().replace(/\/+$/,'');
-  if(!backendUrl) return;
-  localStorage.setItem(LS_KEY, backendUrl);
+  backendUrl = 'http://localhost:8000';
   if(ws) try{ ws.close(); }catch(e){}
   
   if(document.getElementById('liveBadgeText')) document.getElementById('liveBadgeText').textContent = 'Connecting…';
@@ -225,7 +220,7 @@ function connect(){
     setTimeout(connect, 3000);
   };
 }
-document.getElementById('connectBtn').addEventListener('click', connect);
+// Remove connectBtn listener since button will be removed
 
 function sevBadge(sev){
   if(sev === 'CRITICAL') return `<span class="sev-badge sev-critical">CRITICAL</span>`;
@@ -525,7 +520,8 @@ function exportTableToCSV(tbodyId, filename) {
 }
 setInterval(pollHealth, 4000);
 
-if(backendUrl) connect();
+// Auto-connect on load
+connect();
 
 document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
