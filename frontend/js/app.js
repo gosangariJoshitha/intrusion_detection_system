@@ -271,7 +271,9 @@ function renderEvents(){
   `).join('');
   events.forEach(e => e._new = false);
 }
-document.getElementById('searchInput').addEventListener('input', renderEvents);
+if (document.getElementById('searchInput')) {
+  document.getElementById('searchInput').addEventListener('input', renderEvents);
+}
 
 // ---------------- Chart & Metrics ----------------
 function bucketEvent(e){
