@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+aids_backend.db
+backend/venv/
+backend/.venv/
+node_modules/
+.DS_Store
