@@ -135,26 +135,42 @@ async function fetchAudit() {
 }
 
 let activeIp = '';
-async function openIpModal(ip) {
+async function openIpModal(ip){
   activeIp = ip;
   document.getElementById('modalIp').textContent = ip;
+  document.getElementById('modalEvents').textContent = 'Loading...';
+  document.getElementById('modalIntrusions').textContent = 'Loading...';
+  document.getElementById('modalIncidents').textContent = 'Loading...';
+  document.getElementById('modalAttacks').textContent = 'Loading...';
+  
+  // Show modal immediately so user sees loading state
   document.getElementById('ipModal').classList.add('open');
+
   try {
-    const res = await fetch(backendUrl + '/api/ip/' + ip);
+    const res = await fetch(backendUrl + '/api/ip/' + encodeURIComponent(ip));
+    if(!res.ok) throw new Error('Not found');
     const data = await res.json();
+    
     document.getElementById('modalEvents').textContent = data.total_events;
     document.getElementById('modalIntrusions').textContent = data.intrusion_count;
     document.getElementById('modalIncidents').textContent = data.incidents;
     document.getElementById('modalAttacks').textContent = data.attack_types.length ? data.attack_types.join(', ') : 'None';
-    
-    // Fetch TI Enrichment
+  } catch(e) {
+    document.getElementById('modalEvents').textContent = '0';
+    document.getElementById('modalIntrusions').textContent = '0';
+    document.getElementById('modalIncidents').textContent = '0';
+    document.getElementById('modalAttacks').textContent = 'None';
+  }
+
+  try {
     document.getElementById('tiLocation').textContent = 'Loading...';
     document.getElementById('tiAsn').textContent = 'Loading...';
     document.getElementById('tiRiskBadge').textContent = '...';
     document.getElementById('tiRiskBadge').style.background = 'transparent';
     document.getElementById('tiTagsWrap').style.display = 'none';
     
-    const tiRes = await fetch(backendUrl + '/api/ip/' + ip + '/enrich');
+    const tiRes = await fetch(backendUrl + '/api/ip/' + encodeURIComponent(ip) + '/enrich');
+    if(!tiRes.ok) throw new Error('Not found');
     const tiData = await tiRes.json();
     
     document.getElementById('tiLocation').textContent = tiData.country;
@@ -185,9 +201,20 @@ function closeIpModal(){
 function manualLookup(inputId = 'manualLookupInput') {
   const el = document.getElementById(inputId);
   if(!el) return;
-  const val = el.value.trim();
+  let val = el.value.trim();
   if(!val) return;
   el.value = '';
+  
+  // Clean URL to extract hostname or pure IP
+  try {
+    if(val.startsWith('http://') || val.startsWith('https://')) {
+      const url = new URL(val);
+      val = url.hostname;
+    } else if(val.includes('/')) {
+      val = val.split('/')[0];
+    }
+  } catch(e) {}
+  
   openIpModal(val);
 }
 
