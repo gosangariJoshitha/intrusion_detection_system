@@ -346,7 +346,7 @@ def get_ip_profile(ip: str, db: Session = Depends(get_db)):
     incidents = db.query(Incident).filter(Incident.source_ip == ip).all()
     
     total_events = len(events)
-    intrusions = [e for e in events if e.status == "Attack"]
+    intrusions = [e for e in events if e.status != "Normal"]
     attack_types = list(set([e.attack_type for e in intrusions if e.attack_type]))
     
     return {
