@@ -7,7 +7,9 @@ let chartBuckets = [];
 const BUCKET_SECONDS = 10, MAX_BUCKETS = 30;
 let protoCounts = { 'TCP': 0, 'UDP': 0, 'ICMP': 0, 'DNS': 0, 'Other': 0 };
 let totalProtos = 0;
-
+let activeIp = '';
+let activeIncidentId = null;
+let currentUser = { name: 'Joshitha Gosangari', role: 'Analyst' };
 
 
 function showToast(msg) {
@@ -18,10 +20,19 @@ function showToast(msg) {
 }
 
 async function triggerResponse(action, target) {
+  if(currentUser.role === 'Viewer') {
+    showToast('Permission denied. Viewers cannot execute responses.');
+    return;
+  }
+  
+  if(!confirm(`Are you sure you want to execute ${action} on ${target}?\n\nThis action requires Analyst or Admin approval.`)) {
+    return;
+  }
+  
   try {
     const res = await fetch(backendUrl + '/api/response', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({action, target, reason: "Manual analyst action"})
+      body: JSON.stringify({action, target, reason: `Manual action by ${currentUser.name}`})
     });
     if(res.ok) showToast(`${action} applied to ${target} and logged.`);
   } catch(e) { console.error(e); }
@@ -49,23 +60,16 @@ async function correctLabel(eventId, label) {
 }
 
 async function triggerRetrain() {
-  const btn = document.getElementById('retrainBtn');
-  const status = document.getElementById('retrainStatus');
-  btn.disabled = true;
-  status.textContent = 'Retraining models... this may take a moment.';
-  try {
-    const res = await fetch(backendUrl + '/api/retrain', {method: 'POST'});
-    const data = await res.json();
-    if (data.status === 'success') {
-       status.textContent = `Success! ${data.message}`;
-       showToast("Models retrained and reloaded successfully.");
-    } else {
-       status.textContent = data.message;
-    }
-  } catch(e) { 
-    status.textContent = 'Retraining failed. See console.';
-  }
-  btn.disabled = false;
+  if(currentUser.role === 'Viewer') return showToast('Permission denied.');
+  document.getElementById('retrainBtn').textContent = 'Retraining...';
+  fetch(backendUrl + '/api/retrain', {method: 'POST'})
+    .then(r=>r.json())
+    .then(data => {
+      document.getElementById('retrainBtn').textContent = 'Trigger Incremental Retraining';
+      showToast(data.message);
+    }).catch(e=>{
+      document.getElementById('retrainBtn').textContent = 'Trigger Incremental Retraining';
+    });
 }
 
 async function fetchIncidents() {
@@ -75,19 +79,14 @@ async function fetchIncidents() {
     const data = await res.json();
     const tbody = document.getElementById('incidentsBody');
     tbody.innerHTML = data.map(i => `
-      <tr>
-        <td>#${i.id}</td>
+      <tr style="cursor:pointer;" onclick="openIncidentModal(${i.id})">
+        <td class="mono" style="color:var(--cyan);">#${i.id}</td>
         <td class="mono" style="color:var(--text-muted);">${new Date(i.updated_at).toLocaleTimeString()}</td>
-        <td class="ip" onclick="openIpModal('${i.source_ip}')">${i.source_ip}</td>
-        <td class="attack-type">${i.attack_type}</td>
+        <td class="ip">${i.source_ip}</td>
+        <td class="attack-type">${i.attack_type || '—'}</td>
         <td>${sevBadge(i.severity)}</td>
         <td>
-          <select onchange="updateIncidentStatus(${i.id}, this)">
-            <option value="New" ${i.status==='New'?'selected':''}>New</option>
-            <option value="Investigating" ${i.status==='Investigating'?'selected':''}>Investigating</option>
-            <option value="Contained" ${i.status==='Contained'?'selected':''}>Contained</option>
-            <option value="Resolved" ${i.status==='Resolved'?'selected':''}>Resolved</option>
-          </select>
+          <span class="badge" style="background:rgba(255,255,255,0.05);">${i.status}</span>
         </td>
       </tr>
     `).join('');
@@ -133,7 +132,6 @@ async function fetchAudit() {
   } catch(e) {}
 }
 
-let activeIp = '';
 async function openIpModal(ip){
   activeIp = ip;
   document.getElementById('modalIp').textContent = ip;
@@ -258,7 +256,6 @@ function connect(){
     setTimeout(connect, 3000);
   };
 }
-// Remove connectBtn listener since button will be removed
 
 function sevBadge(sev){
   if(sev === 'CRITICAL') return `<span class="sev-badge sev-critical">CRITICAL</span>`;
@@ -377,6 +374,36 @@ function renderEvents(){
 }
 if (document.getElementById('searchInput')) {
   document.getElementById('searchInput').addEventListener('input', renderEvents);
+}
+
+// ---------------- Authentication & RBAC ----------------
+function doLogin() {
+  const name = document.getElementById('loginName').value.trim() || 'User';
+  const role = document.getElementById('loginRole').value;
+  currentUser = { name, role };
+  
+  document.getElementById('loginOverlay').style.display = 'none';
+  
+  // Update UI with user info
+  const nameEls = document.querySelectorAll('.profile-name, .topbar-user .name');
+  const roleEls = document.querySelectorAll('.profile-role, .topbar-user .role');
+  const avEls = document.querySelectorAll('.avatar');
+  
+  nameEls.forEach(el => el.textContent = name);
+  roleEls.forEach(el => el.textContent = role);
+  avEls.forEach(el => el.textContent = name.substring(0,2).toUpperCase());
+  
+  // Enforce RBAC on auth-required buttons
+  const authBtns = document.querySelectorAll('.auth-required');
+  if(role === 'Viewer') {
+    authBtns.forEach(btn => {
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      btn.title = 'Permission denied (Viewer)';
+      btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showToast('Permission denied.'); };
+    });
+  }
+  showToast(`Logged in as ${name} (${role})`);
 }
 
 // ---------------- Chart & Metrics ----------------
@@ -555,6 +582,48 @@ function exportTableToCSV(tbodyId, filename) {
   downloadLink.click();
   document.body.removeChild(downloadLink);
   showToast(`Exported ${filename} successfully.`);
+}
+
+// ---------------- Incident Modal ----------------
+async function openIncidentModal(id) {
+  activeIncidentId = id;
+  document.getElementById('incIdDisplay').textContent = `Incident #${id}`;
+  document.getElementById('incidentModal').classList.add('open');
+  
+  try {
+    const res = await fetch(backendUrl + '/api/incidents');
+    const data = await res.json();
+    const inc = data.find(i => i.id === id);
+    if(inc) {
+      document.getElementById('incOwner').value = inc.owner || '';
+      document.getElementById('incStatus').value = inc.status || 'New';
+      document.getElementById('incNotes').value = inc.analyst_notes || '';
+    }
+  } catch(e) {}
+}
+
+function closeIncidentModal() {
+  document.getElementById('incidentModal').classList.remove('open');
+  activeIncidentId = null;
+}
+
+async function saveIncident() {
+  if(currentUser.role === 'Viewer') return showToast('Permission denied.');
+  if(!activeIncidentId) return;
+  
+  const owner = document.getElementById('incOwner').value.trim();
+  const status = document.getElementById('incStatus').value;
+  const analyst_notes = document.getElementById('incNotes').value.trim();
+  
+  try {
+    await fetch(backendUrl + `/api/incidents/${activeIncidentId}`, {
+      method: 'PATCH', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({status, owner, analyst_notes})
+    });
+    showToast(`Incident #${activeIncidentId} saved.`);
+    closeIncidentModal();
+    fetchIncidents();
+  } catch(e) { console.error(e); }
 }
 setInterval(pollHealth, 4000);
 

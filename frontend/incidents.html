@@ -167,11 +167,54 @@
   </div>
 </div>
 
+<!-- Incident Modal -->
+<div class="modal-overlay" id="incidentModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeIncidentModal()">&times;</button>
+    <h2 class="display" style="margin-bottom:10px; font-size:22px;">Incident Details</h2>
+    <div class="mono" id="incIdDisplay" style="color:var(--cyan); font-size:16px; margin-bottom:20px;"></div>
+    
+    <label style="font-size:12px; color:var(--text-secondary);">Owner</label>
+    <input type="text" id="incOwner" class="login-input" style="margin-bottom:15px; padding:10px;" placeholder="Unassigned">
+
+    <label style="font-size:12px; color:var(--text-secondary);">Status</label>
+    <select id="incStatus" class="login-input" style="margin-bottom:15px; padding:10px; appearance:none;">
+      <option value="New">New</option>
+      <option value="Investigating">Investigating</option>
+      <option value="Contained">Contained</option>
+      <option value="Resolved">Resolved</option>
+    </select>
+
+    <label style="font-size:12px; color:var(--text-secondary);">Analyst Notes</label>
+    <textarea id="incNotes" class="login-input" style="height:80px; resize:vertical; padding:10px;" placeholder="Add evidence, analysis, or mitigation steps here..."></textarea>
+    
+    <button class="login-btn auth-required" onclick="saveIncident()" style="margin-top:10px;">Save Changes</button>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
   <span id="toastMsg">Action completed.</span>
 </div>
 
 <script src="js/app.js" defer></script>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div style="margin-bottom:20px;">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <h2 class="display" style="font-size:24px; margin-bottom:5px;">AIDS Auth</h2>
+    <p style="color:var(--text-secondary); font-size:13px; margin-bottom:20px;">Authenticate to access the monitoring dashboard.</p>
+    <input type="text" id="loginName" class="login-input" placeholder="Your Name" value="Joshitha Gosangari">
+    <select id="loginRole" class="login-input" style="appearance:none; background-image:url('data:image/svg+xml;utf8,<svg fill=%22%23fff%22 viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>'); background-repeat:no-repeat; background-position:right 10px center; background-size:20px;">
+      <option value="Admin">Administrator</option>
+      <option value="Analyst" selected>Security Analyst</option>
+      <option value="Viewer">Viewer (Read-Only)</option>
+    </select>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
 </body>
+
 </html>
