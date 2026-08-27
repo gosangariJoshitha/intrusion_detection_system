@@ -61,22 +61,17 @@
       <div class="pill"><span class="pulse"></span> Node: <b>ALPHA-01</b></div>
       <div class="pill">Latency: <b id="latencyVal">14ms</b></div>
     </div>
-    <div class="topbar-right">
-      <div class="live-badge" id="liveBadge"><span class="pulse"></span> <span id="liveBadgeText">Connecting…</span></div>
-      <div class="topbar-user"><div class="name">Joshitha Gosangari</div><div class="role">Security lead</div></div>
-      <div class="avatar">JG</div>
-    </div>
-  </div>
-
-  <div class="conn-bar">
-    <div class="conn-row" style="justify-content: flex-end;">
+    <div class="topbar-right" style="display:flex; align-items:center; gap:20px;">
       <div class="mode-toggle">
         <button id="modeSimBtn" class="mode-btn mode-active" data-mode="simulated">Simulated</button>
         <button id="modeLiveBtn" class="mode-btn" data-mode="live">Live capture</button>
       </div>
+      <div class="live-badge" id="liveBadge"><span class="pulse"></span> <span id="liveBadgeText">Connecting…</span></div>
+      <div class="topbar-user"><div class="name">Joshitha Gosangari</div><div class="role">Security lead</div></div>
+      <div class="avatar">JG</div>
     </div>
-    <div id="connStatus" class="conn-status" style="display:none;"></div>
-  </div>
+  </header>
+  <main class="content">
 
   <!-- VIEW: HISTORY -->
   <section id="sec-history" class="view-section" >
