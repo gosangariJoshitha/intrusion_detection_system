@@ -202,6 +202,10 @@ function connect(){
     if(document.getElementById('attackAvgFoot')) document.getElementById('attackAvgFoot').textContent = 'Total since boot';
     if(document.getElementById('detAccFoot')) document.getElementById('detAccFoot').textContent = 'Real-time inference';
     if(document.getElementById('uptimeFoot')) document.getElementById('uptimeFoot').textContent = 'Seconds';
+    if(document.getElementById('connectBtn')) {
+      document.getElementById('connectBtn').textContent = 'Connected';
+      document.getElementById('connectBtn').style.background = 'rgba(52,225,161,0.25)';
+    }
   };
   ws.onmessage = (msg) => {
     let data;
@@ -212,6 +216,10 @@ function connect(){
   ws.onclose = () => {
     if(document.getElementById('liveBadgeText')) document.getElementById('liveBadgeText').textContent = 'Disconnected';
     if(document.getElementById('liveBadge')) document.getElementById('liveBadge').style.color = 'var(--red)';
+    if(document.getElementById('connectBtn')) {
+      document.getElementById('connectBtn').textContent = 'Connect';
+      document.getElementById('connectBtn').style.background = '';
+    }
     setTimeout(connect, 3000);
   };
 }
