@@ -60,6 +60,10 @@
     <div class="topbar-left">
       <div class="pill"><span class="pulse"></span> Node: <b>ALPHA-01</b></div>
       <div class="pill">Latency: <b id="latencyVal">14ms</b></div>
+      <div class="lookup-bar">
+        <input type="text" id="manualLookupInput" placeholder="Investigate IP or URL..." class="mono" onkeypress="if(event.key==='Enter') manualLookup()">
+        <button onclick="manualLookup()">Check</button>
+      </div>
     </div>
     <div class="topbar-right" style="display:flex; align-items:center; gap:20px;">
       <div class="mode-toggle">

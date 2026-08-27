@@ -178,7 +178,19 @@ async function openIpModal(ip) {
     
   } catch(e) {}
 }
-function closeIpModal() { document.getElementById('ipModal').classList.remove('open'); }
+function closeIpModal(){
+  document.getElementById('ipModal').classList.remove('open');
+}
+
+function manualLookup(inputId = 'manualLookupInput') {
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  const val = el.value.trim();
+  if(!val) return;
+  el.value = '';
+  openIpModal(val);
+}
+
 function blockModalIp() { triggerResponse('BLOCK_IP', activeIp); closeIpModal(); }
 
 // ---------------- Backend Connection ----------------
