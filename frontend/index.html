@@ -820,6 +820,10 @@ function connect(){
     document.getElementById('liveBadgeText').textContent = 'Live sync active';
     document.getElementById('liveBadge').style.color = 'var(--green)';
     document.getElementById('opStatus').textContent = 'nominal';
+    document.getElementById('nodeCount').textContent = '— Connected securely';
+    document.getElementById('attackAvgFoot').textContent = 'Total since boot';
+    document.getElementById('detAccFoot').textContent = 'Real-time inference';
+    document.getElementById('uptimeFoot').textContent = 'Seconds';
   };
   ws.onmessage = (msg) => {
     let data;
@@ -925,6 +929,9 @@ async function pollHealth() {
     const data = await res.json();
     document.getElementById('activeThreats').textContent = data.intrusions_detected;
     document.getElementById('attackAvg').textContent = data.events_processed;
+    if (data.uptime_seconds != null) {
+      document.getElementById('uptime').textContent = data.uptime_seconds.toFixed(0);
+    }
     
     if(data.avg_confidence != null) {
       document.getElementById('detAcc').textContent = data.avg_confidence.toFixed(1);
